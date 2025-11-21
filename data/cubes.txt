@@ -1,0 +1,6 @@
+{"id":"cube1","basePoint":[0,0,0],"sideLength":2}
+{"id":"cube2","basePoint":[1,1,1],"sideLength":3}
+{"id":"cube3","basePoint":[-1,-1,-1],"sideLength":1.5}
+{"id":"cube4","basePoint":[0,0,5],"sideLength":4}
+{"id":"invalid1","basePoint":[0,0,0],"sideLength":0}
+{"id":"invalid2","basePoint":[0,0],"sideLength":2}
