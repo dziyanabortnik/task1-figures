@@ -1,6 +1,8 @@
-{"id":"cube1","basePoint":[0,0,0],"sideLength":2}
-{"id":"cube2","basePoint":[1,1,1],"sideLength":3}
-{"id":"cube3","basePoint":[-1,-1,-1],"sideLength":1.5}
-{"id":"cube4","basePoint":[0,0,5],"sideLength":4}
-{"id":"invalid1","basePoint":[0,0,0],"sideLength":0}
-{"id":"invalid2","basePoint":[0,0],"sideLength":2}
+# Cube data: id x y z sideLength
+cube1 0 0 0 2
+cube2 1 1 1 3
+cube3 -1 -1 -1 1.5
+cube4 0 0 5 4
+# Invalid data
+invalid1 0 0 0 0
+invalid2 0 0 2

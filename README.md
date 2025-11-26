@@ -52,7 +52,7 @@ npm test
 
 ### Run Tests with Coverage
 ```bash
-npm run test:coverage
+npm test -- --coverage
 ```
 
 ### Code Style Check

@@ -1,6 +1,8 @@
-{"id":"rect1","points":[[0,0],[4,0],[4,3],[0,3]]}
-{"id":"rect2","points":[[1,1],[5,1],[5,4],[1,4]]}
-{"id":"rect3","points":[[-1,-1],[2,-1],[2,2],[-1,2]]}
-{"id":"square1","points":[[0,0],[3,0],[3,3],[0,3]]}
-{"id":"invalid1","points":[[0,0],[4,0],[4,3]]}
-{"id":"invalid2","points":[[0,0,0],[4,0,0],[4,3,0],[0,3,0]]}
+# Rectangle data: id x1 y1 x2 y2 x3 y3 x4 y4
+rect1 0 0 4 0 4 3 0 3
+rect2 1 1 5 1 5 4 1 4
+rect3 -1 -1 2 -1 2 2 -1 2
+square1 0 0 3 0 3 3 0 3
+# Invalid data
+invalid1 0 0 4 0 4 3
+invalid2 0 0 4 0 4 3 0 3 0

@@ -3,12 +3,11 @@ import { Rectangle } from "../../src/entities/Rectangle";
 import { Point } from "../../src/entities/Point";
 import { InvalidDataFormatError } from "../../src/exceptions/CustomExceptions";
 
-// Tests for RectangleFactory - creates rectangles from JSON data
 describe("RectangleFactory", () => {
   const factory = new RectangleFactory();
 
   test("should validate and create rectangle from correct data", () => {
-    const data = '{"id":"rect1","points":[[0,0],[4,0],[4,3],[0,3]]}';
+    const data = "rect1 0 0 4 0 4 3 0 3";
     expect(factory.validateData(data)).toBe(true);
     
     const rectangle = factory.createFromString(data);
@@ -20,7 +19,7 @@ describe("RectangleFactory", () => {
   });
 
   test("should handle decimal coordinates", () => {
-    const data = '{"id":"rect2","points":[[1.5,2.5],[5.5,2.5],[5.5,4.5],[1.5,4.5]]}';
+    const data = "rect2 1.5 2.5 5.5 2.5 5.5 4.5 1.5 4.5";
     expect(factory.validateData(data)).toBe(true);
     
     const rectangle = factory.createFromString(data);
@@ -29,7 +28,7 @@ describe("RectangleFactory", () => {
   });
 
   test("should handle negative coordinates", () => {
-    const data = '{"id":"rect3","points":[[-1,-1],[2,-1],[2,2],[-1,2]]}';
+    const data = "rect3 -1 -1 2 -1 2 2 -1 2";
     expect(factory.validateData(data)).toBe(true);
     
     const rectangle = factory.createFromString(data);
@@ -37,23 +36,28 @@ describe("RectangleFactory", () => {
     expect(rectangle.point1.y).toBe(-1);
   });
 
-  test("should throw error for invalid JSON", () => {
-    expect(factory.validateData("invalid json")).toBe(false);
-    expect(() => factory.createFromString("invalid json")).toThrow(InvalidDataFormatError);
+  test("should skip comments and empty lines", () => {
+    expect(factory.validateData("# Comment line")).toBe(false);
+    expect(factory.validateData("")).toBe(false);
   });
 
-  test("should throw error for missing required fields", () => {
-    const invalidData = '{"id":"rect1"}'; // missing points
-    expect(factory.validateData(invalidData)).toBe(false);
+  test("should throw error for invalid format", () => {
+    expect(factory.validateData("invalid data")).toBe(false);
+    expect(() => factory.createFromString("invalid data")).toThrow(InvalidDataFormatError);
   });
 
   test("should throw error for insufficient points", () => {
-    const invalidData = '{"id":"rect1","points":[[0,0],[4,0],[4,3]]}'; // only 3 points
+    const invalidData = "rect1 0 0 4 0 4 3";
     expect(factory.validateData(invalidData)).toBe(false);
   });
 
-  test("should handle whitespace in JSON", () => {
-    const data = '  { "id": "rect1", "points": [ [0,0], [4,0], [4,3], [0,3] ] }  ';
+  test("should throw error for non-numeric values", () => {
+    const data = "rect1 a 0 4 0 4 3 0 3";
+    expect(factory.validateData(data)).toBe(false);
+  });
+
+  test("should handle whitespace", () => {
+    const data = "  rect1  0  0  4  0  4  3  0  3  ";
     expect(factory.validateData(data)).toBe(true);
     
     const rectangle = factory.createFromString(data);
