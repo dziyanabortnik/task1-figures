@@ -1,4 +1,4 @@
-import { Point } from '../entities/Point.js';
+import { Point } from '../entities/Point';
 
 //Utility class for point validation
 export class PointValidator {

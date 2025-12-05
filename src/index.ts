@@ -1,50 +1,70 @@
-/* eslint-disable no-undef */
-import { RectangleFactory } from './factories/RectangleFactory.js';
-import { CubeFactory } from './factories/CubeFactory.js';
-import { RectangleValidator } from './validators/RectangleValidator.js';
-import { CubeValidator } from './validators/CubeValidator.js';
-import { RectangleCalculator } from './calculators/RectangleCalculator.js';
-import { CubeCalculator } from './calculators/CubeCalculator.js';
-import { FileReader } from './utils/FileReader.js';
-import { Logger } from './utils/Logger.js';
+import { FileReader } from "./utils/FileReader";
+import { Logger } from "./utils/Logger";
+import { CubeFactory } from "./factories/CubeFactory";
+import { RectangleFactory } from "./factories/RectangleFactory";
+import { CubeValidator } from "./validators/CubeValidator";
+import { RectangleValidator } from "./validators/RectangleValidator";
+import { Warehouse } from "./warehouse/Warehouse";
+import { ShapesRepository } from "./repository/ShapesRepositoryImpl";
+import { FindByQuadrantSpecification } from "./repository/specifications/BasicSpecifications";
+import {
+  FindByAreaRangeSpecification,
+  FindByVolumeRangeSpecification,
+} from "./repository/specifications/CalculatedSpecifications";
+import {
+  ByIdComparator,
+  ByAreaComparator,
+} from "./repository/comparators/ShapeComparators";
+import { SortUtils } from "./repository/SortUtils";
 import {
   ShapeValidationError,
   FileReadError,
-  CalculationError,
   InvalidDataFormatError,
-} from './exceptions/CustomExceptions.js';
+} from "./exceptions/CustomExceptions";
+import { Cube } from "./entities/Cube";
 
-//Main application class - orchestrates all business logic
 export class ShapesApplication {
   private readonly logger = Logger.getInstance();
   private readonly rectangleFactory = new RectangleFactory();
   private readonly cubeFactory = new CubeFactory();
   private readonly rectangleValidator = new RectangleValidator();
   private readonly cubeValidator = new CubeValidator();
-  private readonly rectangleCalculator = new RectangleCalculator();
-  private readonly cubeCalculator = new CubeCalculator();
+  private readonly repository = new ShapesRepository();
+  private readonly warehouse = Warehouse.getInstance();
 
-  // Main application entry point
   public async run(): Promise<void> {
     try {
-      this.logger.info('Starting Shapes Application...');
-      await this.processRectangles();
-      await this.processCubes();
-      this.logger.info('Shapes Application completed successfully.');
+      this.logger.info("Starting Updated Shapes Application...");
+
+      // Главный процесс: загрузка - обработка - демонстрация паттернов
+      console.log("DESIGN PATTERNS DEMONSTRATION");
+
+      await this.loadShapesFromFiles();
+      await this.processShapes();
+      this.demoRepositoryFeatures();
+      this.demoWarehouseFeatures();
+
+      this.logger.info("Application completed successfully.");
     } catch (error) {
       this.logger.error(`Application error: ${error}`);
       throw error;
     }
   }
 
-  // Process rectangles from file
-  private async processRectangles(): Promise<void> {
-    this.logger.info('Processing rectangles...');
+  private async loadShapesFromFiles(): Promise<void> {
+    this.logger.info("Loading shapes from files...");
 
+    // Factory Pattern: создание объектов из файлов
+    await this.loadRectangles();
+    await this.loadCubes();
+
+    console.log(`Total shapes loaded: ${this.repository.getCount()}`);
+  }
+
+  private async loadRectangles(): Promise<void> {
     try {
-      const lines = await FileReader.readLines('./data/rectangles.txt');
-      let validCount = 0;
-      let invalidCount = 0;
+      const lines = await FileReader.readLines("./data/rectangles.txt");
+      let loaded = 0;
 
       for (const line of lines) {
         try {
@@ -52,38 +72,33 @@ export class ShapesApplication {
             const rectangle = this.rectangleFactory.createFromString(line);
 
             if (this.rectangleValidator.isValidRectangle(rectangle)) {
-              validCount++;
-              this.processRectangle(rectangle);
-            } else {
-              invalidCount++;
-              this.logger.warn(`Invalid rectangle configuration: ${line}`);
+              // Observer Pattern: привязываем Warehouse к Rectangle
+              rectangle.attach(this.warehouse);
+
+              // Repository Pattern: добавляем в хранилище
+              this.repository.add(rectangle);
+
+              // Singleton Pattern: Warehouse предварительно кэширует
+              this.warehouse.getArea(rectangle);
+              this.warehouse.getPerimeter(rectangle);
+              loaded++;
             }
-          } else {
-            invalidCount++;
-            this.logger.warn(`Invalid rectangle data format: ${line}`);
           }
         } catch (error) {
-          invalidCount++;
-          this.handleProcessingError(error, line, 'rectangle');
+          this.handleShapeLoadingError(error, line, "rectangle");
         }
       }
 
-      this.logger.info(
-        `Rectangles processed: ${validCount} valid, ${invalidCount} invalid`,
-      );
+      console.log(`Rectangles loaded: ${loaded}`);
     } catch (error) {
-      this.handleFileError(error, 'rectangles');
+      this.handleFileError(error, "rectangles");
     }
   }
 
-  // Process cubes from file
-  private async processCubes(): Promise<void> {
-    this.logger.info('Processing cubes...');
-
+  private async loadCubes(): Promise<void> {
     try {
-      const lines = await FileReader.readLines('./data/cubes.txt');
-      let validCount = 0;
-      let invalidCount = 0;
+      const lines = await FileReader.readLines("./data/cubes.txt");
+      let loaded = 0;
 
       for (const line of lines) {
         try {
@@ -91,208 +106,131 @@ export class ShapesApplication {
             const cube = this.cubeFactory.createFromString(line);
 
             if (this.cubeValidator.isValidCube(cube)) {
-              validCount++;
-              this.processCube(cube);
-            } else {
-              invalidCount++;
-              this.logger.warn(`Invalid cube configuration: ${line}`);
+              // Observer Pattern: привязываем Warehouse к Cube
+              cube.attach(this.warehouse);
+
+              this.repository.add(cube);
+              this.warehouse.getSurfaceArea(cube);
+              this.warehouse.getVolume(cube);
+              loaded++;
             }
-          } else {
-            invalidCount++;
-            this.logger.warn(`Invalid cube data format: ${line}`);
           }
         } catch (error) {
-          invalidCount++;
-          this.handleProcessingError(error, line, 'cube');
+          this.handleShapeLoadingError(error, line, "cube");
         }
       }
 
-      this.logger.info(
-        `Cubes processed: ${validCount} valid, ${invalidCount} invalid`,
-      );
+      console.log(`Cubes loaded: ${loaded}`);
     } catch (error) {
-      this.handleFileError(error, 'cubes');
+      this.handleFileError(error, "cubes");
     }
   }
 
-  // Process single rectangle - calculate properties and log results
-  private processRectangle(rectangle: any): void {
-    try {
-      const area = this.rectangleCalculator.calculateArea(rectangle);
-      const perimeter = this.rectangleCalculator.calculatePerimeter(rectangle);
-      const diagonal = this.rectangleCalculator.calculateDiagonal(rectangle);
+  private async processShapes(): Promise<void> {
+    this.logger.info("Processing all shapes...");
 
-      const isSquare = this.rectangleValidator.isSquare(rectangle);
-      const isRhombus = this.rectangleValidator.isRhombus(rectangle);
-      const isTrapezoid = this.rectangleValidator.isTrapezoid(rectangle);
-
-      this.logRectangleResults(
-        rectangle.id,
-        area,
-        perimeter,
-        diagonal,
-        isSquare,
-        isRhombus,
-        isTrapezoid,
-      );
-    } catch (error) {
-      this.handleCalculationError(error, rectangle.id, 'rectangle');
-    }
+    const allShapes = this.repository.findAll();
+    console.log(`Processed ${allShapes.length} shapes`);
   }
 
-  // Process single cube - calculate properties and log results
-  private processCube(cube: any): void {
-    try {
-      const surfaceArea = this.cubeCalculator.calculateSurfaceArea(cube);
-      const volume = this.cubeCalculator.calculateVolume(cube);
-      const spaceDiagonal = this.cubeCalculator.calculateSpaceDiagonal(cube);
-      const faceDiagonal = this.cubeCalculator.calculateFaceDiagonal(cube);
+  private demoRepositoryFeatures(): void {
+    console.log("REPOSITORY & SPECIFICATION PATTERNS");
 
-      const isOnXYPlane = this.cubeValidator.isBaseOnSpecificPlane(cube, 'xy');
-      const isOnXZPlane = this.cubeValidator.isBaseOnSpecificPlane(cube, 'xz');
-      const isOnYZPlane = this.cubeValidator.isBaseOnSpecificPlane(cube, 'yz');
-
-      const volumeRatioXY = this.cubeCalculator.calculateVolumeRatioByPlane(
-        cube,
-        'xy',
-      );
-      const volumeRatioXZ = this.cubeCalculator.calculateVolumeRatioByPlane(
-        cube,
-        'xz',
-      );
-      const volumeRatioYZ = this.cubeCalculator.calculateVolumeRatioByPlane(
-        cube,
-        'yz',
-      );
-
-      this.logCubeResults(
-        cube.id,
-        surfaceArea,
-        volume,
-        spaceDiagonal,
-        faceDiagonal,
-        isOnXYPlane,
-        isOnXZPlane,
-        isOnYZPlane,
-        volumeRatioXY,
-        volumeRatioXZ,
-        volumeRatioYZ,
-      );
-    } catch (error) {
-      this.handleCalculationError(error, cube.id, 'cube');
+    // 1. Repository Pattern: поиск по ID
+    const shapeById = this.repository.findById("cube1");
+    if (shapeById) {
+      console.log(`Found by ID: cube1`);
     }
-  }
 
-  // Log rectangle analysis results
-  private logRectangleResults(
-    id: string,
-    area: number,
-    perimeter: number,
-    diagonal: number,
-    isSquare: boolean,
-    isRhombus: boolean,
-    isTrapezoid: boolean,
-  ): void {
-    this.logger.info(
-      {
-        shape: 'Rectangle',
-        id,
-        area: area.toFixed(2),
-        perimeter: perimeter.toFixed(2),
-        diagonal: diagonal.toFixed(2),
-        isSquare,
-        isRhombus,
-        isTrapezoid,
-      },
-      'Rectangle analysis completed',
+    // 2. Specification Pattern: поиск в квадранте
+    const firstQuadrantSpec = new FindByQuadrantSpecification(1);
+    const firstQuadrantShapes =
+      this.repository.findBySpecification(firstQuadrantSpec);
+    console.log(`Shapes in 1st quadrant: ${firstQuadrantShapes.length}`);
+
+    // 3. Specification Pattern: поиск по площади
+    const areaSpec = new FindByAreaRangeSpecification(10, 50);
+    const shapesByArea = this.repository.findBySpecification(areaSpec);
+    console.log(`Shapes with area 10-50: ${shapesByArea.length}`);
+
+    // 4. Specification Pattern: поиск по объему
+    const volumeSpec = new FindByVolumeRangeSpecification(1, 100);
+    const shapesByVolume = this.repository.findBySpecification(volumeSpec);
+    console.log(`Shapes with volume 1-100: ${shapesByVolume.length}`);
+
+    // 5. Comparator Pattern: сортировка по ID
+    const sortedById = SortUtils.sortShapes(
+      this.repository.findAll(),
+      new ByIdComparator()
     );
-  }
-
-  // Log cube analysis results
-  private logCubeResults(
-    id: string,
-    surfaceArea: number,
-    volume: number,
-    spaceDiagonal: number,
-    faceDiagonal: number,
-    isOnXYPlane: boolean,
-    isOnXZPlane: boolean,
-    isOnYZPlane: boolean,
-    volumeRatioXY: number,
-    volumeRatioXZ: number,
-    volumeRatioYZ: number,
-  ): void {
-    this.logger.info(
-      {
-        shape: 'Cube',
-        id,
-        surfaceArea: surfaceArea.toFixed(2),
-        volume: volume.toFixed(2),
-        spaceDiagonal: spaceDiagonal.toFixed(2),
-        faceDiagonal: faceDiagonal.toFixed(2),
-        isOnXYPlane,
-        isOnXZPlane,
-        isOnYZPlane,
-        volumeRatioXY: volumeRatioXY.toFixed(3),
-        volumeRatioXZ: volumeRatioXZ.toFixed(3),
-        volumeRatioYZ: volumeRatioYZ.toFixed(3),
-      },
-      'Cube analysis completed',
+    console.log(
+      `Sorted by ID: ${sortedById
+        .slice(0, 3)
+        .map((s) => s.id)
+        .join(", ")}...`
     );
+
+    // 6. Comparator Pattern: сортировка по площади
+    const sortedByArea = SortUtils.sortShapes(
+      this.repository.findAll(),
+      new ByAreaComparator()
+    );
+    console.log("Shapes sorted by area");
   }
 
-  // Handle processing errors for individual shapes
-  private handleProcessingError(
+  private demoWarehouseFeatures(): void {
+    console.log("OBSERVER & SINGLETON PATTERNS");
+
+    const cube = this.repository.findById("cube1");
+
+    if (cube && cube instanceof Cube) {
+      const typedCube = cube as Cube;
+
+      // Singleton Pattern: доступ к единственному экземпляру Warehouse
+      const volumeBefore = this.warehouse.getVolume(cube);
+      console.log(`1. Initial volume: ${volumeBefore.toFixed(2)}`);
+      console.log(`2. Side length: ${typedCube.sideLength}`);
+
+      // Observer Pattern: изменение свойства запускает уведомление
+      console.log(`3. Changing side to ${typedCube.sideLength + 1}`);
+      typedCube.sideLength = typedCube.sideLength + 1;
+
+      // Observer в действии: Warehouse автоматически пересчитывает
+      const volumeAfter = this.warehouse.getVolume(cube);
+      console.log(`4. New volume: ${volumeAfter.toFixed(2)}`);
+
+      if (Math.abs(volumeAfter - volumeBefore) > 0.01) {
+        console.log("OBSERVER WORKS: Warehouse updated automatically!");
+      }
+    }
+  }
+
+  private handleShapeLoadingError(
     error: unknown,
     data: string,
-    shapeType: string,
+    shapeType: string
   ): void {
     if (
       error instanceof ShapeValidationError ||
       error instanceof InvalidDataFormatError
     ) {
-      this.logger.warn(
-        `Skipping invalid ${shapeType}: ${error.message}. Data: ${data}`,
-      );
-    } else {
-      this.logger.error(
-        `Unexpected error processing ${shapeType}: ${error}. Data: ${data}`,
-      );
+      this.logger.warn(`Skipping invalid ${shapeType}: ${error.message}`);
     }
   }
 
-  // Handle file reading errors
   private handleFileError(error: unknown, fileType: string): void {
     if (error instanceof FileReadError) {
       this.logger.error(`Error reading ${fileType} file: ${error.message}`);
-    } else {
-      this.logger.error(`Unexpected error with ${fileType} file: ${error}`);
     }
   }
 
-  // Handle calculation errors
-  private handleCalculationError(
-    error: unknown,
-    shapeId: string,
-    shapeType: string,
-  ): void {
-    if (error instanceof CalculationError) {
-      this.logger.error(
-        `Calculation error for ${shapeType} ${shapeId}: ${error.message}`,
-      );
-    } else {
-      this.logger.error(
-        `Unexpected calculation error for ${shapeType} ${shapeId}: ${error}`,
-      );
-    }
+  //Получить экземпляр Warehouse (для тестирования)
+  public getWarehouse(): Warehouse {
+    return this.warehouse;
   }
-}
 
-// Application entry point when run directly
-if (require.main === module) {
-  const app = new ShapesApplication();
-  app.run().catch((error) => {
-    console.error('Fatal application error:', error);
-    process.exit(1);
-  });
+  //Получить репозиторий (для тестирования)
+  public getRepository(): ShapesRepository {
+    return this.repository;
+  }
 }

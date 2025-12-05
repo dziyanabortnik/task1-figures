@@ -1,5 +1,5 @@
-import { Shape } from './Shape.js';
-import { Point } from './Point.js';
+import { Shape } from './Shape';
+import { Point } from './Point';
 
 //Rectangle entity with 4 corner points
 export class Rectangle extends Shape {

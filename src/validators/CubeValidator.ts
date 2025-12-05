@@ -1,4 +1,4 @@
-import { Cube } from '../entities/Cube.js';
+import { Cube } from '../entities/Cube';
 
 //Validator for cube properties and positioning
 export class CubeValidator {

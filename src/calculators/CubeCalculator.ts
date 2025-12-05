@@ -1,54 +1,56 @@
-import { Cube } from '../entities/Cube.js';
-import { CalculationError } from '../exceptions/CustomExceptions.js';
-
-//Calculator for cube geometry operations
+import { Cube } from "../entities/Cube";
+import { CalculationError } from "../exceptions/CustomExceptions";
 
 export class CubeCalculator {
-  // Calculate surface area of cube
+  // Площадь поверхности куба
   public calculateSurfaceArea(cube: Cube): number {
-    if (cube.sideLength <= 0) {
-      throw new CalculationError('Cube side length must be positive');
+    const side = cube.sideLength;
+    if (side <= 0) {
+      throw new CalculationError("Cube side length must be positive");
     }
     return 6 * Math.pow(cube.sideLength, 2);
   }
 
-  // Calculate volume of cube
+  // Объем куба
   public calculateVolume(cube: Cube): number {
-    if (cube.sideLength <= 0) {
-      throw new CalculationError('Cube side length must be positive');
+    const side = cube.sideLength;
+    if (side <= 0) {
+      throw new CalculationError("Cube side length must be positive");
     }
-    return Math.pow(cube.sideLength, 3);
+    return Math.pow(side, 3);
   }
 
-  // Calculate volume ratio when cut by coordinate plane
+  // Соотношение объемов при разрезании плоскостью
   public calculateVolumeRatioByPlane(
     cube: Cube,
-    plane: 'xy' | 'xz' | 'yz',
+    plane: "xy" | "xz" | "yz"
   ): number {
-    if (cube.sideLength <= 0) {
-      throw new CalculationError('Cube side length must be positive');
+    const sideLength = cube.sideLength;
+    if (sideLength <= 0) {
+      throw new CalculationError("Cube side length must be positive");
     }
 
-    const { basePoint, sideLength } = cube;
+    const { basePoint } = cube;
     let distanceFromPlane = 0;
 
     switch (plane) {
-    case 'xy':
-      distanceFromPlane = Math.abs(basePoint.z);
-      break;
-    case 'xz':
-      distanceFromPlane = Math.abs(basePoint.y);
-      break;
-    case 'yz':
-      distanceFromPlane = Math.abs(basePoint.x);
-      break;
-    default:
-      throw new CalculationError(`Invalid plane: ${plane}`);
+      case "xy":
+        distanceFromPlane = Math.abs(basePoint.z);
+        break;
+      case "xz":
+        distanceFromPlane = Math.abs(basePoint.y);
+        break;
+      case "yz":
+        distanceFromPlane = Math.abs(basePoint.x);
+        break;
+      default:
+        throw new CalculationError(`Invalid plane: ${plane}`);
     }
 
     if (distanceFromPlane <= 0) return 0;
     if (distanceFromPlane >= sideLength) return 1;
 
+     // Вычисление соотношения объемов
     const smallerVolume = Math.pow(distanceFromPlane, 3);
     const largerVolume = Math.pow(sideLength - distanceFromPlane, 3);
     return (
@@ -57,19 +59,21 @@ export class CubeCalculator {
     );
   }
 
-  // Calculate space diagonal
+  // Пространственная диагональ
   public calculateSpaceDiagonal(cube: Cube): number {
-    if (cube.sideLength <= 0) {
-      throw new CalculationError('Cube side length must be positive');
+    const side = cube.sideLength;
+    if (side <= 0) {
+      throw new CalculationError("Cube side length must be positive");
     }
-    return cube.sideLength * Math.sqrt(3);
+    return side * Math.sqrt(3);
   }
 
-  // Calculate face diagonal
+  // Диагональ грани
   public calculateFaceDiagonal(cube: Cube): number {
-    if (cube.sideLength <= 0) {
-      throw new CalculationError('Cube side length must be positive');
+    const side = cube.sideLength;
+    if (side <= 0) {
+      throw new CalculationError("Cube side length must be positive");
     }
-    return cube.sideLength * Math.sqrt(2);
+    return side * Math.sqrt(2);
   }
 }

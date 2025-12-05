@@ -1,4 +1,4 @@
-import { Shape } from '../entities/Shape.js';
+import { Shape } from '../entities/Shape';
 
 // Factory interface for creating shape objects
 export interface ShapeFactory<T extends Shape> {

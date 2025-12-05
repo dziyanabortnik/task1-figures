@@ -1,22 +1,40 @@
 {
   "name": "task1-figures",
   "version": "1.0.0",
-  "description": "Geometry shapes calculation application",
-  "type": "module",
+  "description": "Geometry shapes calculation application with repository and warehouse patterns",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node --esm --experimental-specifier-resolution=node --project tsconfig.esm.json src/index.ts",
+    "start": "node dist/run.js",
+    "start:updated": "node dist/updated_app/UpdatedShapesApplication.js",
+    "dev": "ts-node --esm src/run.ts",
+    "dev:updated": "ts-node --esm --experimental-specifier-resolution=node --project tsconfig.esm.json src/updated_app/UpdatedShapesApplication.ts",
+    "demo": "ts-node --esm --experimental-specifier-resolution=node src/demo.ts",
+    "demo:updated": "ts-node --esm --experimental-specifier-resolution=node src/updated_app/demo.ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "test:repository": "jest tests/repository/",
+    "test:warehouse": "jest tests/warehouse/",
+    "test:comparators": "jest tests/repository/comparators/",
+    "test:specifications": "jest tests/repository/specifications/",
+    "test:integration": "jest tests/updated_app/",
+    "test:all": "jest --coverage",
+    "lint": "eslint src/**/*.ts tests/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts tests/**/*.ts --fix",
+    "clean": "rm -rf dist coverage"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dziyanabortnik/task1-figures.git"
   },
-  "keywords": ["geometry", "shapes", "typescript"],
+  "keywords": [
+    "geometry",
+    "shapes",
+    "typescript",
+    "repository",
+    "warehouse",
+    "observer",
+    "singleton"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
