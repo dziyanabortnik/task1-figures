@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { FileReadError } from '../exceptions/CustomExceptions.js';
+import { FileReadError } from '../exceptions/CustomExceptions';
 
 // Utility for reading and parsing shape data files
 export class FileReader {

@@ -1,6 +1,6 @@
-import { Rectangle } from '../entities/Rectangle.js';
-import { Point } from '../entities/Point.js';
-import { PointValidator } from './PointValidator.js';
+import { Rectangle } from '../entities/Rectangle';
+import { Point } from '../entities/Point';
+import { PointValidator } from './PointValidator';
 
 //Validator for rectangle properties and characteristics
 export class RectangleValidator {

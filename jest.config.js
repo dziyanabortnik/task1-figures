@@ -18,4 +18,6 @@ export default {
     '**/tests/**/*.test.ts',
   ],
   moduleFileExtensions: ['ts', 'js', 'json'],
+  testTimeout: 5000,
+  maxWorkers: 1,
 };
