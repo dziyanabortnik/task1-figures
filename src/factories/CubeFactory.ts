@@ -1,7 +1,7 @@
-import { ShapeFactory } from './ShapeFactory.js';
-import { Cube } from '../entities/Cube.js';
-import { Point } from '../entities/Point.js';
-import { InvalidDataFormatError, ShapeValidationError } from '../exceptions/CustomExceptions.js';
+import { ShapeFactory } from './ShapeFactory';
+import { Cube } from '../entities/Cube';
+import { Point } from '../entities/Point';
+import { InvalidDataFormatError, ShapeValidationError } from '../exceptions/CustomExceptions';
 
 export class CubeFactory implements ShapeFactory<Cube> {
   private static readonly DATA_REGEX = /^([a-zA-Z0-9_]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)$/;

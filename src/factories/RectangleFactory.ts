@@ -1,7 +1,7 @@
-import { ShapeFactory } from './ShapeFactory.js';
-import { Rectangle } from '../entities/Rectangle.js';
-import { Point } from '../entities/Point.js';
-import { InvalidDataFormatError } from '../exceptions/CustomExceptions.js';
+import { ShapeFactory } from './ShapeFactory';
+import { Rectangle } from '../entities/Rectangle';
+import { Point } from '../entities/Point';
+import { InvalidDataFormatError } from '../exceptions/CustomExceptions';
 
 export class RectangleFactory implements ShapeFactory<Rectangle> {
   private static readonly DATA_REGEX = /^([a-zA-Z0-9_]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)\s+([-+]?[0-9]*\.?[0-9]+)$/;

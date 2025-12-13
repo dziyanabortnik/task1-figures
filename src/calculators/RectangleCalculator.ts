@@ -1,5 +1,5 @@
-import { Rectangle } from '../entities/Rectangle.js';
-import { Point } from '../entities/Point.js';
+import { Rectangle } from '../entities/Rectangle';
+import { Point } from '../entities/Point';
 
 // Calculator for rectangle geometry operations
 export class RectangleCalculator {
